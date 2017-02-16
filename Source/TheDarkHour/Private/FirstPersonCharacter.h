@@ -24,57 +24,38 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	float UsualSpeed = 0.f;
 	FVector CameraLocation;
-	UCameraComponent* Camera;
 
+	UCameraComponent* Camera;
 	UCapsuleComponent* Capsule = nullptr;
 	UCharacterMovementComponent* CharacterMovement = nullptr;
-
 	UCurveFloat* CurveInitialize();
 
-	float UsualSpeed = 0.f;
-	
-	FORCEINLINE bool VTraceSphere(
-		AActor* ActorToIgnore,
-		const FVector& Start,
-		const FVector& End,
-		const float Radius,
-		FHitResult& HitOut
-		//ECollisionChannel TraceChannel = ECC_Pawn
-	);
-
 	UPROPERTY()
-	struct FTimeline time;
-	UFUNCTION()
-	void OnCurveUpdate(float val);
+		struct FTimeline time;
 
-	bool SphereTraceSingleByObject_DEPRECATED(UObject* WorldContextObject, const FVector Start, const FVector End, float Radius,
-		const TArray<TEnumAsByte<ECollisionChannel> > & ObjectsToTrace, bool bTraceComplex, const TArray<AActor*>& ActorsToIgnore, EDrawDebugTrace::Type DrawDebugType, FHitResult& OutHit, bool bIgnoreSelf);
+	UFUNCTION()
+		void OnCurveUpdate(float val);	
 protected:
-	/*UPROPERTY()
-		UTimelineComponent* ScoreTimeline;
-
-	UPROPERTY()
-		UCurveFloat* fCurve;
-
-	FOnTimelineFloat InterpFunction{};
-
-	UFUNCTION()
-		void TimelineFloatReturn(float val);*/
-		
-		
-
-	UPROPERTY(BlueprintReadOnly, Category = Movement)
-		uint32 bIsCrouching : 1;
-
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		bool bIsBlocking;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		uint32 bIsCrouching : 1;	
+
+	UPROPERTY(EditDefaultsOnly, Category = Movement)
+		float SprintSpeed = 800;
 
 	UPROPERTY(EditDefaultsOnly, Category = Movement)
 		float CrouchSpeed = 200;
 
+	//UFUNCTION(BlueprintCallable, Category = Movement) // TODO make sprint in c++
+	//	void StartSprint(float val);
+
 	UFUNCTION(BlueprintCallable, Category = Movement)
 		void StartCrouch();
+
 	UFUNCTION(BlueprintCallable, Category = Movement)
 		void StopCrouch();
 	
