@@ -3,6 +3,7 @@
 #include "TheDarkHour.h"
 #include "TheDarkHourGameModeBase.h"
 
-
-
-
+//void ATheDarkHourGameModeBase::BeginPlay()
+//{
+//	Super::BeginPlay();
+//}

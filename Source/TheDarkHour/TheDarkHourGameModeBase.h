@@ -13,7 +13,6 @@ class THEDARKHOUR_API ATheDarkHourGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+		//void BeginPlay() override;	
+
 };
