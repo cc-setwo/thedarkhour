@@ -27,8 +27,11 @@ void AFirstPersonCharacter::BeginPlay()
 	progressFunction.BindUFunction(this, "OnCurveUpdate");
 
 	time = FTimeline();
-	time.AddInterpFloat(curve, progressFunction, TEXT("Float Function"));	
+	time.AddInterpFloat(curve, progressFunction, TEXT("Float Function"));
 	
+	FOnTimelineEvent TimeLineEventForFinishCurve{};
+	TimeLineEventForFinishCurve.BindUFunction(this, "OnCurveFinish");
+	time.SetTimelineFinishedFunc(TimeLineEventForFinishCurve);
 	UsualSpeed = CharacterMovement->MaxWalkSpeed;
 	bIsCrouching = 0;	
 }
@@ -70,7 +73,15 @@ void AFirstPersonCharacter::OnCurveUpdate(float val)
 	Capsule->SetCapsuleHalfHeight(FMath::Lerp(96.f, 48.f, val));// TODO Magic numbers 96 48	
 	Camera->SetRelativeLocation(FMath::Lerp(CameraLocation, FVector(CameraLocation.X, CameraLocation.Y, CameraLocation.Z - 20), val), true); // TODO Magic number -20
 	
-	CharacterMovement->MaxWalkSpeed = FMath::Lerp(UsualSpeed, CrouchSpeed, val);		
+	CharacterMovement->MaxWalkSpeed = FMath::Lerp(UsualSpeed, CrouchSpeed, val);	
+}
+
+void AFirstPersonCharacter::OnCurveFinish()
+{
+	if (!bIsCrouching)
+	{
+		CharacterMovement->MaxWalkSpeed = UsualSpeed;
+	}
 }
 
 // Called every frame

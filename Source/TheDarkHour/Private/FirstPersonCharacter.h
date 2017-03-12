@@ -30,13 +30,15 @@ private:
 	UCameraComponent* Camera;
 	UCapsuleComponent* Capsule = nullptr;
 	UCharacterMovementComponent* CharacterMovement = nullptr;
-	UCurveFloat* CurveInitialize();
-
+	UCurveFloat* CurveInitialize();	
 	UPROPERTY()
 		struct FTimeline time;
 
 	UFUNCTION()
 		void OnCurveUpdate(float val);	
+
+	UFUNCTION()
+		void OnCurveFinish();
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		bool bIsBlocking;
