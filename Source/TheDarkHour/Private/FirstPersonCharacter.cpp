@@ -22,6 +22,7 @@ void AFirstPersonCharacter::BeginPlay()
 	Camera = FindComponentByClass<UCameraComponent>();
 	CameraLocation = Camera->GetRelativeTransform().GetLocation();
 	
+	// Crouch
 	UCurveFloat* curve = CurveInitialize();
 	FOnTimelineFloat progressFunction{};
 	progressFunction.BindUFunction(this, "OnCurveUpdate");
@@ -32,6 +33,15 @@ void AFirstPersonCharacter::BeginPlay()
 	FOnTimelineEvent TimeLineEventForFinishCurve{};
 	TimeLineEventForFinishCurve.BindUFunction(this, "OnCurveFinish");
 	time.SetTimelineFinishedFunc(TimeLineEventForFinishCurve);
+
+	// Sprint
+	UCurveFloat* curveSprint = CurveInitialize();
+	FOnTimelineFloat progressFunctionSprint{};
+	progressFunctionSprint.BindUFunction(this, "OnCurveUpdateSprint");
+
+	timeSprint = FTimeline();
+	timeSprint.AddInterpFloat(curveSprint, progressFunctionSprint, TEXT("Float Function"));
+	
 	UsualSpeed = CharacterMovement->MaxWalkSpeed;
 	bIsCrouching = 0;	
 }
@@ -44,10 +54,23 @@ UCurveFloat* AFirstPersonCharacter::CurveInitialize()
 	return curve;
 }
 
-//void AFirstPersonCharacter::StartSprint(float val)
-//{
-//	CharacterMovement->MaxWalkSpeed = val;
-//}
+void AFirstPersonCharacter::StartSprint()
+{
+	bRunning = 1;
+	timeSprint.Play();
+}
+
+void AFirstPersonCharacter::StopSprint()
+{
+	bRunning = 0;	
+	timeSprint.Reverse();
+}
+
+void AFirstPersonCharacter::OnCurveUpdateSprint(float val)
+{
+	CharacterMovement->MaxWalkSpeed = FMath::Lerp(UsualSpeed, SprintSpeed, val);	
+}
+
 
 void AFirstPersonCharacter::StartCrouch()
 {	
@@ -57,12 +80,14 @@ void AFirstPersonCharacter::StartCrouch()
 
 void AFirstPersonCharacter::StopCrouch()
 {	
-	bIsCrouching = 0;		
+	bIsCrouching = 0;	
+	bStandingUp = true;
 }
 
 void AFirstPersonCharacter::OnCurveUpdate(float val)
 {	
-	if (val == 0) { return; }
+	CharacterMovement->MaxWalkSpeed = FMath::Lerp(UsualSpeed, CrouchSpeed, val);
+	//if (val == 0) { return; }
 	
 	if (bIsBlocking == 1 && bIsCrouching == 0)
 	{
@@ -73,26 +98,26 @@ void AFirstPersonCharacter::OnCurveUpdate(float val)
 	Capsule->SetCapsuleHalfHeight(FMath::Lerp(96.f, 48.f, val));// TODO Magic numbers 96 48	
 	Camera->SetRelativeLocation(FMath::Lerp(CameraLocation, FVector(CameraLocation.X, CameraLocation.Y, CameraLocation.Z - 20), val), true); // TODO Magic number -20
 	
-	CharacterMovement->MaxWalkSpeed = FMath::Lerp(UsualSpeed, CrouchSpeed, val);	
+		
 }
 
 void AFirstPersonCharacter::OnCurveFinish()
 {
 	if (!bIsCrouching)
 	{
-		CharacterMovement->MaxWalkSpeed = UsualSpeed;
+		//CharacterMovement->MaxWalkSpeed = UsualSpeed;
+		bStandingUp = false;
 	}
 }
 
 // Called every frame
 void AFirstPersonCharacter::Tick( float DeltaTime )
 {
-	Super::Tick( DeltaTime );	
-	
+	Super::Tick( DeltaTime );		
 	
 
 
-	if(bIsCrouching == 0)
+	if(bIsCrouching == 0 && bStandingUp)
 	{
 		auto ActorLoc = GetActorLocation();
 		FHitResult out;
@@ -111,13 +136,18 @@ void AFirstPersonCharacter::Tick( float DeltaTime )
 			true);
 		
 		if(bIsBlocking == 0) // for standing up!
-		{			
+		{		
 			time.Reverse();
 		}		
 	}	
 	if (time.IsPlaying())
-	{
+	{		
 		time.TickTimeline(DeltaTime);
+	}
+
+	if (timeSprint.IsPlaying())
+	{
+		timeSprint.TickTimeline(DeltaTime);
 	}
 }
 

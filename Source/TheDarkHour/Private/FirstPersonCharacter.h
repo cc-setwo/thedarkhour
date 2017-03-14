@@ -23,8 +23,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-private:
-	float UsualSpeed = 0.f;
+private:	
+	float UsualSpeed = 0.f;	
 	FVector CameraLocation;
 
 	UCameraComponent* Camera;
@@ -39,12 +39,29 @@ private:
 
 	UFUNCTION()
 		void OnCurveFinish();
+
+	//Sprint
+	UPROPERTY()
+		struct FTimeline timeSprint;
+
+	UFUNCTION()
+		void OnCurveUpdateSprint(float val);
+
+	//UFUNCTION()
+	//	void OnCurveUpdateFinish();
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		bool bIsBlocking;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
-		uint32 bIsCrouching : 1;	
+		uint32 bIsCrouching : 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		uint32 bRunning : 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		uint32 bStandingUp : 1;
 
 	UPROPERTY(EditDefaultsOnly, Category = Movement)
 		float SprintSpeed = 800;
@@ -61,4 +78,10 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = Movement)
 		void StopCrouch();
 	
+	//Sprint
+	UFUNCTION(BlueprintCallable, Category = Movement)
+		void StartSprint();
+
+	UFUNCTION(BlueprintCallable, Category = Movement)
+		void StopSprint();
 };
